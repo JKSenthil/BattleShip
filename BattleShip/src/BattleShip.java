@@ -4,13 +4,13 @@ public class BattleShip {
     public static void main(String[] args){
         //init keyboard input stream
         Scanner input = new Scanner(System.in);
-        
+
         //init misc variables
         String userInput = "";
         char inputLetter = 'z';
         int inputNumber = 0;
         int inputNumber2 = 0;
-        int rowNum = 999, columnNum = 999, check = 999;
+        int rowNum = 999, columnNum = 999;
 
         //player v AI
         int playerHits = 0;
@@ -25,6 +25,14 @@ public class BattleShip {
         boolean[][] playerHitGrid = new boolean[10][10];
         boolean[][] computerGrid = new boolean[10][10];
         boolean[][] computerHitGrid = new boolean[10][10];
+
+        //variable set up for intelligent computer AI
+        boolean isHit = false;
+        boolean right = false, left = false, up = false, down = false;
+        boolean firstStep = false, secondStep = false;
+        int baseRow = 0, baseColumn = 0;
+        int count = 1;
+        int counter = 2;
 
         //sets up a boolean to control repeat loops
         boolean loop = true;
@@ -479,7 +487,9 @@ public class BattleShip {
                 System.out.print(letters[i]);
                 System.out.print("  ");
                 for(int x = 0; x<10; x++){
-                    if(playerHitGrid[i][x]){
+                    if(playerHitGrid[i][x] && computerGrid[i][x]){
+                        System.out.print("H" + "   ");
+                    }else if(playerHitGrid[i][x]){
                         System.out.print("X" + "   ");
                     }else{
                         System.out.print(" " + "   ");
@@ -554,7 +564,9 @@ public class BattleShip {
                 System.out.print(letters[i]);
                 System.out.print("  ");
                 for(int x = 0; x<10; x++){
-                    if(playerHitGrid[i][x]){
+                    if(playerHitGrid[i][x] && computerGrid[i][x]){
+                        System.out.print("H" + "   ");
+                    }else if(playerHitGrid[i][x]){
                         System.out.print("X" + "   ");
                     }else{
                         System.out.print(" " + "   ");
@@ -586,15 +598,124 @@ public class BattleShip {
             }
             //--------------------------------------COMPUTER TURN---------------------------------------------//
             System.out.println("\f");
-            Random rand = new Random();
-            boolean tempLoop = true;
-            do{
-                columnNum = rand.nextInt(10);
-                rowNum = rand.nextInt(10);
-                if(!computerHitGrid[rowNum][columnNum]){
-                    tempLoop = false;
+            if(isHit){
+                if(firstStep && !secondStep){
+                    boolean tempLoop = true;
+                    do{
+                        if(count==1){
+                            //to the right
+                            if((baseColumn+1) <= 9){
+                                columnNum = baseColumn+1;
+                                rowNum = baseRow;
+                            }else{
+                                count = 2;
+                            }
+                        }
+                        if(count==2){
+                            //to the left
+                            if((baseColumn-1) >= 0){
+                                columnNum = baseColumn-1;
+                                rowNum = baseRow;
+                            }else{
+                                count = 3;
+                            }
+                        }
+                        if(count==3){
+                            //to the up
+                            if((baseRow-1) >= 0){
+                                rowNum = baseRow-1;
+                                columnNum = baseColumn;
+                            }else{
+                                count = 4;
+                            }
+                        }
+                        if(count==4){
+                            //to the down
+                            if((baseRow+1) <= 9){
+                                rowNum = baseRow+1;
+                                columnNum = baseColumn;
+                            }
+                        }
+                        if(!computerHitGrid[rowNum][columnNum]){
+                            tempLoop = false;
+                        }else{
+                            count++;
+                        }
+                    }while(tempLoop);
+                }else if(secondStep){
+                    if(right){
+                        if((baseColumn+counter) <= 9){
+                            columnNum = baseColumn + counter;
+                            rowNum = baseRow;
+                            counter++;
+                        }else{
+                            secondStep = false;
+                            isHit = false;
+                            count = 1;
+                            counter = 2;
+                            right = false;
+                            left = false;
+                            up = false;
+                            down = false;
+                        }
+                    }else if(left){
+                        if((baseColumn-counter) >= 0){
+                            columnNum = baseColumn - counter;
+                            rowNum = baseRow;
+                            counter++;
+                        }else{
+                            secondStep = false;
+                            isHit = false;
+                            count = 1;
+                            counter = 2;
+                            right = false;
+                            left = false;
+                            up = false;
+                            down = false;
+                        }
+                    }else if(up){
+                        if((baseRow-counter) >= 0){
+                            rowNum = baseRow - counter;
+                            columnNum = baseColumn;
+                            counter++;
+                        }else{
+                            secondStep = false;
+                            isHit = false;
+                            count = 1;
+                            counter = 2;
+                            right = false;
+                            left = false;
+                            up = false;
+                            down = false;
+                        }
+                    }else if(down){
+                        if((baseRow+counter) <= 9){
+                            rowNum = baseRow + counter;
+                            columnNum = baseColumn;
+                            counter++;
+                        }else{
+                            secondStep = false;
+                            isHit = false;
+                            count = 1;
+                            counter = 2;
+                            right = false;
+                            left = false;
+                            up = false;
+                            down = false;
+                        }
+                    }
                 }
-            }while(tempLoop);
+            }else{
+                Random rand = new Random();
+                boolean tempLoop = true;
+                do{
+                    columnNum = rand.nextInt(10);
+                    rowNum = rand.nextInt(10);
+                    if(!computerHitGrid[rowNum][columnNum]){
+                        tempLoop = false;
+                    }
+                }while(tempLoop);
+            }
             System.out.println("");
             System.out.println("The computer strikes at " + letters[rowNum] + "" + (columnNum+1) + "!");
             try{
@@ -614,8 +735,10 @@ public class BattleShip {
                 System.out.print(letters[i]);
                 System.out.print("  ");
                 for(int x = 0; x<10; x++){
-                    if(computerHitGrid[i][x]){
+                    if(computerHitGrid[i][x] && playerGrid[i][x]){
                         System.out.print("H" + "   ");
+                    }else if(computerHitGrid[i][x]){
+                        System.out.print("X" + "   ");
                     }else if(playerGrid[i][x]){
                         System.out.print("*" + "   ");
                     }else{
@@ -632,8 +755,39 @@ public class BattleShip {
             if(playerGrid[rowNum][columnNum]){
                 System.out.println("It is a hit!");
                 computerHits++;
+
+                isHit = true;
+                if(!firstStep){
+                    firstStep = true;
+                    baseRow = rowNum;
+                    baseColumn = columnNum;
+                }else if(firstStep){
+                    if(count==1){
+                        right = true;
+                    }else if(count==2){
+                        left = true;
+                    }else if(count==3){
+                        up = true;
+                    }else if(count==4){
+                        down = true;
+                    }
+                    secondStep = true;
+                }
             }else{
                 System.out.println("It's a miss!");
+                if(firstStep && !secondStep){
+                    count++;
+                }else if(secondStep){
+                    firstStep = false;
+                    secondStep = false;
+                    isHit = false;
+                    count = 1;
+                    counter = 2;
+                    right = false;
+                    left = false;
+                    up = false;
+                    down = false;
+                }
             }
             System.out.println("");
             if(computerHits == 17){
